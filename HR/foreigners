@@ -1,0 +1,4 @@
+1. query to db
+
+select prc_numer, prc_imie, prc_imie2, prc_nazwisko, prc_plec, prc_data_ur, prc_pesel, prc_obywatelstwo, prc_paszport, prc_dowod_osob
+  from ek_pracownicy where prc_obywatelstwo != 'Polskie'
