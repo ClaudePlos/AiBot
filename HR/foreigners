@@ -1,11 +1,29 @@
 1. query to db
 
-select prc_numer, prc_imie, prc_imie2, prc_nazwisko, prc_plec, prc_data_ur, prc_pesel, prc_obywatelstwo, prc_paszport, prc_dowod_osob
+
+begin
+eap_globals.USTAW_firme(300000);
+eap_globals.USTAW_konsolidacje('N');
+end;
+
+
+select distinct prc_numer, prc_imie, prc_imie2, prc_nazwisko, prc_plec, prc_data_ur, prc_pesel, prc_obywatelstwo, prc_paszport, prc_dowod_osob
 , zat_data_przyj, zat_data_zmiany, stn_nazwa
 , (select zwd_numer||' - '||zwd_nazwa from ek_zawody where zwd_id = zat_zwd_id) kod_zawodu
 , (select wsl_opis from css_wartosci_slownikow where wsl_sl_nazwa = 'EK_RODZAJ_ZAT' and wsl_wartosc = zat_f_rodzaj) rodzaj_umowy
+, sk_kod
+, adr_kod_pocztowy, wojwodztwo, adr_gmina, adr_ulica, adr_powiat, adr_miejscowosc, adr_numer_domu, adr_numer_lokalu
+, (select SUBSTR(wsl_alias,1,3)/SUBSTR(wsl_alias,4,6) from css_wartosci_slownikow where wsl_sl_nazwa like 'TYP_ETATU' and zat_wymiar=wsl_wartosc) etat
+, zat_stawka
   from ek_pracownicy, zpt_stanowiska
 , (select * from ek_zatrudnienie zat1 where zat_data_zmiany = (select max(zat_data_zmiany) from ek_zatrudnienie zat2 where zat_typ_umowy = 0 and zat2.zat_prc_id = zat1.zat_prc_id)) zat
+, (select adr_kod_pocztowy, woj_nazwa wojwodztwo, adr_gmina, adr_ulica, adr_powiat, adr_miejscowosc, adr_numer_domu, adr_numer_lokalu, sk_id, sk_kod
+  from knt_umowy, ckk_klienci_dane, ckk_adresy , css_wojewodztwa, css_stanowiska_kosztow, css_wartosci_pol
+ where um_kl_kod = kld_kl_kod and wap_dep_id = 100024 and sk_wap_id = wap_id and adr_kl_kod = kld_kl_kod and um_id = wap_wartosc 
+   and kld_zatwierdzony = 'T' and kld_f_aktualne = 'T' and adr_f_aktualne = 'T' and adr_woj_id = woj_id) adr
  where zat.zat_prc_id = prc_id 
   and zat_stn_id = stn_id 
+  and zat.zat_sk_id = adr.sk_id
   and prc_obywatelstwo != 'Polskie'
+  and prc_paszport is not null
+  order by zat_data_zmiany desc
