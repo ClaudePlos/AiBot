@@ -1,7 +1,9 @@
 1. query to db
 
 select prc_numer, prc_imie, prc_imie2, prc_nazwisko, prc_plec, prc_data_ur, prc_pesel, prc_obywatelstwo, prc_paszport, prc_dowod_osob
-, zat_data_przyj, stn_nazwa
+, zat_data_przyj, zat_data_zmiany, stn_nazwa
+, (select zwd_numer||' - '||zwd_nazwa from ek_zawody where zwd_id = zat_zwd_id) kod_zawodu
+, (select wsl_opis from css_wartosci_slownikow where wsl_sl_nazwa = 'EK_RODZAJ_ZAT' and wsl_wartosc = zat_f_rodzaj) rodzaj_umowy
   from ek_pracownicy, zpt_stanowiska
 , (select * from ek_zatrudnienie zat1 where zat_data_zmiany = (select max(zat_data_zmiany) from ek_zatrudnienie zat2 where zat_typ_umowy = 0 and zat2.zat_prc_id = zat1.zat_prc_id)) zat
  where zat.zat_prc_id = prc_id 
