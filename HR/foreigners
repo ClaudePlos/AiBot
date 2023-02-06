@@ -1,4 +1,9 @@
 1. query to db
 
 select prc_numer, prc_imie, prc_imie2, prc_nazwisko, prc_plec, prc_data_ur, prc_pesel, prc_obywatelstwo, prc_paszport, prc_dowod_osob
-  from ek_pracownicy where prc_obywatelstwo != 'Polskie'
+, zat_data_przyj, stn_nazwa
+  from ek_pracownicy, zpt_stanowiska
+, (select * from ek_zatrudnienie zat1 where zat_data_zmiany = (select max(zat_data_zmiany) from ek_zatrudnienie zat2 where zat_typ_umowy = 0 and zat2.zat_prc_id = zat1.zat_prc_id)) zat
+ where zat.zat_prc_id = prc_id 
+  and zat_stn_id = stn_id 
+  and prc_obywatelstwo != 'Polskie'
